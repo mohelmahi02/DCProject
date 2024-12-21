@@ -5,7 +5,27 @@
 </head>
 <body>
     <h1>Students</h1>
-    <a href="/">Home</a>
-    <p>Welcome to the Students Page!</p>
+    <a href="/students/add">Add Student</a><br>
+    <a href="/">Home</a><br><br>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% students.forEach(student => { %>
+                <tr>
+                    <td><%= student.sid %></td>
+                    <td><%= student.name %></td>
+                    <td><%= student.age %></td>
+                    <td><a href="/students/edit/<%= student.sid %>">Update</a></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
 </body>
 </html>
