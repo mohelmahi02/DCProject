@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const db = require('../config/db'); 
 
 
 const students = [
@@ -25,9 +26,64 @@ const students = [
     { sid: 'G020', name: 'Alice L\'Estrange', age: 32 },
 ];
 
-
 router.get('/', (req, res) => {
-    res.render('students', { title: 'Students Page', students }); 
+  
+    db.query('SELECT * FROM student', (err, results) => {
+        if (err) {
+            console.error('Error fetching students:', err);
+          
+            res.render('students', { title: 'Students Page', students });
+        } else {
+            res.render('students', { title: 'Students Page', students: results });
+        }
+    });
+});
+
+
+router.get('/edit/:sid', (req, res) => {
+    const studentId = req.params.sid;
+
+    
+    db.query('SELECT * FROM student WHERE sid = ?', [studentId], (err, results) => {
+        if (err) {
+            console.error('Error fetching student:', err);
+            res.status(500).send('Database error');
+        } else if (results.length === 0) {
+            res.status(404).send('Student not found');
+        } else {
+            res.render('editStudent', { title: 'Update Student', student: results[0], errors: [] });
+        }
+    });
+});
+
+
+router.post('/edit/:sid', (req, res) => {
+    const studentId = req.params.sid;
+    const { name, age } = req.body;
+
+    
+    const errors = [];
+    if (!name || name.length < 2) {
+        errors.push('Student Name should be at least 2 characters');
+    }
+    if (!age || age < 18) {
+        errors.push('Student Age should be at least 18');
+    }
+
+    if (errors.length > 0) {
+      
+        res.render('editStudent', { title: 'Update Student', student: { sid: studentId, name, age }, errors });
+    } else {
+        
+        db.query('UPDATE student SET name = ?, age = ? WHERE sid = ?', [name, age, studentId], (err) => {
+            if (err) {
+                console.error('Error updating student:', err);
+                res.status(500).send('Database error');
+            } else {
+                res.redirect('/students'); 
+            }
+        });
+    }
 });
 
 module.exports = router;

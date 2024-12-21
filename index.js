@@ -1,7 +1,11 @@
 const express = require('express');
 const path = require('path');
+const bodyParser = require('body-parser');
 
 const app = express();
+
+// Middleware for parsing form data
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Set up EJS as the view engine
 app.set('view engine', 'ejs');
@@ -41,6 +45,47 @@ app.get("/", (req, res) => {
 app.get("/students", (req, res) => {
     console.log("GET /students");
     res.render("students", { title: "Students Page", students });
+});
+
+
+app.get("/students/edit/:sid", (req, res) => {
+    const studentId = req.params.sid;
+    const student = students.find(student => student.sid === studentId);
+
+    if (!student) {
+        return res.status(404).send('Student not found');
+    }
+
+    res.render("editStudent", { title: "Update Student", student, errors: [] });
+});
+
+
+app.post("/students/edit/:sid", (req, res) => {
+    const studentId = req.params.sid;
+    const { name, age } = req.body;
+
+    const errors = [];
+    if (!name || name.length < 2) {
+        errors.push('Student Name should be at least 2 characters');
+    }
+    if (!age || age < 18) {
+        errors.push('Student Age should be at least 18');
+    }
+
+    const student = students.find(student => student.sid === studentId);
+    if (!student) {
+        return res.status(404).send('Student not found');
+    }
+
+    if (errors.length > 0) {
+        return res.render("editStudent", { title: "Update Student", student: { ...student, name, age }, errors });
+    }
+
+
+    student.name = name;
+    student.age = parseInt(age, 10);
+
+    res.redirect("/students");
 });
 
 

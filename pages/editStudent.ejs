@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title>
+</head>
+<body>
+    <h1>Update Student</h1>
+    <a href="/students">Home</a><br><br>
+
+    <% if (errors.length > 0) { %>
+        <ul style="color: red;">
+            <% errors.forEach(error => { %>
+                <li><%= error %></li>
+            <% }); %>
+        </ul>
+    <% } %>
+
+    <form action="/students/edit/<%= student.sid %>" method="POST">
+        <label>Student ID</label><br>
+        <input type="text" name="sid" value="<%= student.sid %>" readonly><br><br>
+
+        <label>Name</label><br>
+        <input type="text" name="name" value="<%= student.name %>" required><br><br>
+
+        <label>Age</label><br>
+        <input type="number" name="age" value="<%= student.age %>" required><br><br>
+
+        <button type="submit">Update</button>
+    </form>
+</body>
+</html>
