@@ -6,6 +6,25 @@
 <body>
     <h1>Grades</h1>
     <a href="/">Home</a>
-    <p>Welcome to the Grades Page!</p>
+    <br><br>
+
+    <table border="1" cellpadding="5">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Module</th>
+                <th>Grade</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% grades.forEach(grade => { %>
+                <tr>
+                    <td><%= grade.student %></td>
+                    <td><%= grade.module || '' %></td>
+                    <td><%= grade.grade || '' %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
 </body>
 </html>

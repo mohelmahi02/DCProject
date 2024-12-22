@@ -4,13 +4,10 @@ const bodyParser = require('body-parser');
 
 const app = express();
 
-
 app.use(bodyParser.urlencoded({ extended: true }));
-
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'pages'));
-
 
 const students = [
     { sid: 'G001', name: 'New Name', age: 19 },
@@ -35,6 +32,30 @@ const students = [
     { sid: 'G020', name: 'Alice L\'Estrange', age: 32 },
 ];
 
+const grades = [
+    { student: 'Albert Newton', module: 'Algebra', grade: 49 },
+    { student: 'Albert Newton', module: 'Mechanics of Fluids', grade: 78 },
+    { student: 'Alice L\'Estrange', module: '', grade: '' },
+    { student: 'Alison Conners', module: 'Mechanics of Fluids', grade: 72 },
+    { student: 'Alison Conners', module: 'Mechanics of Solids', grade: 79 },
+    { student: 'Amanda Knox', module: 'Long Division', grade: 32 },
+    { student: 'Amanda Knox', module: 'Times Tables', grade: 65 },
+    { student: 'Amanda Knox', module: 'Algebra', grade: 77 },
+    { student: 'Anne Greene', module: 'Poetry', grade: 45 },
+    { student: 'Anne Greene', module: 'Creative Writing', grade: 56 },
+    { student: 'Anne Greene', module: 'Shakespeare', grade: 71 },
+    { student: 'Barbara Harris', module: '', grade: '' },
+    { student: 'Bill Turpin', module: 'Shakespeare', grade: 68 },
+    { student: 'Brian Collins', module: 'Algebra', grade: 28 },
+    { student: 'Brian Collins', module: 'Times Tables', grade: 91 },
+    { student: 'Brian Collins', module: 'Long Division', grade: 92 },
+    { student: 'Fiona O\'Hehir', module: 'Creative Writing', grade: 55 },
+    { student: 'George Johnson', module: 'Poetry', grade: 72 },
+    { student: 'George Johnson', module: 'Creative Writing', grade: 82 },
+    { student: 'James Joyce', module: 'Mobile Applications Development', grade: 32 },
+    { student: 'Johnny Connors', module: 'Mechanics of Fluids', grade: 35 },
+    { student: 'Johnny Connors', module: 'Mechanics of Solids', grade: 32 },
+];
 
 app.get("/", (req, res) => {
     console.log("GET /");
@@ -46,12 +67,10 @@ app.get("/students", (req, res) => {
     res.render("students", { title: "Students Page", students });
 });
 
-
 app.get("/students/add", (req, res) => {
     console.log("GET /students/add");
     res.render("addStudent", { title: "Add Student", errors: [], student: {} });
 });
-
 
 app.post("/students/add", (req, res) => {
     const { sid, name, age } = req.body;
@@ -67,7 +86,6 @@ app.post("/students/add", (req, res) => {
         errors.push("Student Age should be at least 18");
     }
 
-
     const existingStudent = students.find(student => student.sid === sid);
     if (existingStudent) {
         errors.push("Student ID already exists");
@@ -77,12 +95,10 @@ app.post("/students/add", (req, res) => {
         return res.render("addStudent", { title: "Add Student", errors, student: { sid, name, age } });
     }
 
-   
     students.push({ sid, name, age: parseInt(age, 10) });
     console.log("Student added:", { sid, name, age });
     res.redirect("/students");
 });
-
 
 app.get("/students/edit/:sid", (req, res) => {
     const studentId = req.params.sid;
@@ -94,7 +110,6 @@ app.get("/students/edit/:sid", (req, res) => {
 
     res.render("editStudent", { title: "Update Student", student, errors: [] });
 });
-
 
 app.post("/students/edit/:sid", (req, res) => {
     const studentId = req.params.sid;
@@ -123,11 +138,19 @@ app.post("/students/edit/:sid", (req, res) => {
     res.redirect("/students");
 });
 
+app.get("/grades", (req, res) => {
+    const sortedGrades = grades.sort((a, b) => {
+        if (a.student < b.student) return -1;
+        if (a.student > b.student) return 1;
+        return a.grade - b.grade;
+    });
+
+    res.render("grades", { title: "Grades Page", grades: sortedGrades });
+});
 
 app.get("/home", (req, res) => {
     res.redirect("/");
 });
-
 
 app.listen(3004, () => {
     console.log("Application listening on port 3004");
