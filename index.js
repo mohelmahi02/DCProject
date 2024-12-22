@@ -4,14 +4,14 @@ const bodyParser = require('body-parser');
 
 const app = express();
 
-// Middleware for parsing form data
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Set up EJS as the view engine
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'pages'));
 
-// Hardcoded students data
+
 const students = [
     { sid: 'G001', name: 'New Name', age: 19 },
     { sid: 'G002', name: 'Alison Conners', age: 23 },
@@ -41,10 +41,46 @@ app.get("/", (req, res) => {
     res.render("index", { title: "Home Page" });
 });
 
-
 app.get("/students", (req, res) => {
     console.log("GET /students");
     res.render("students", { title: "Students Page", students });
+});
+
+
+app.get("/students/add", (req, res) => {
+    console.log("GET /students/add");
+    res.render("addStudent", { title: "Add Student", errors: [], student: {} });
+});
+
+
+app.post("/students/add", (req, res) => {
+    const { sid, name, age } = req.body;
+
+    const errors = [];
+    if (!sid || sid.trim() === "") {
+        errors.push("Student ID is required");
+    }
+    if (!name || name.length < 2) {
+        errors.push("Student Name should be at least 2 characters");
+    }
+    if (!age || age < 18) {
+        errors.push("Student Age should be at least 18");
+    }
+
+
+    const existingStudent = students.find(student => student.sid === sid);
+    if (existingStudent) {
+        errors.push("Student ID already exists");
+    }
+
+    if (errors.length > 0) {
+        return res.render("addStudent", { title: "Add Student", errors, student: { sid, name, age } });
+    }
+
+   
+    students.push({ sid, name, age: parseInt(age, 10) });
+    console.log("Student added:", { sid, name, age });
+    res.redirect("/students");
 });
 
 
@@ -80,7 +116,6 @@ app.post("/students/edit/:sid", (req, res) => {
     if (errors.length > 0) {
         return res.render("editStudent", { title: "Update Student", student: { ...student, name, age }, errors });
     }
-
 
     student.name = name;
     student.age = parseInt(age, 10);
