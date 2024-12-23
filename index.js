@@ -147,7 +147,8 @@ app.get("/grades", (req, res) => {
 
     res.render("grades", { title: "Grades Page", grades: sortedGrades });
 });
-
+const lecturersRoutes = require('./routes/lecturers');
+app.use('/lecturers', lecturersRoutes);
 app.get("/home", (req, res) => {
     res.redirect("/");
 });
