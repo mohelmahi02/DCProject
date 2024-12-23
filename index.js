@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
+const { MongoClient } = require('mongodb');
+const mysql = require('mysql2');
 
 const app = express();
 
@@ -8,6 +10,23 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'pages'));
+
+const mongoUri = 'mongodb://localhost:27017/proj2024MongoDB';
+const mongoClient = new MongoClient(mongoUri);
+let mongoDb;
+
+const mysqlPool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: 'yourpassword',
+    database: 'proj2024'
+}).promise();
+
+mongoClient.connect().then(() => {
+    mongoDb = mongoClient.db();
+}).catch(err => {
+    console.error('Failed to connect to MongoDB', err);
+});
 
 const students = [
     { sid: 'G001', name: 'New Name', age: 19 },
@@ -58,23 +77,19 @@ const grades = [
 ];
 
 app.get("/", (req, res) => {
-    console.log("GET /");
     res.render("index", { title: "Home Page" });
 });
 
 app.get("/students", (req, res) => {
-    console.log("GET /students");
     res.render("students", { title: "Students Page", students });
 });
 
 app.get("/students/add", (req, res) => {
-    console.log("GET /students/add");
     res.render("addStudent", { title: "Add Student", errors: [], student: {} });
 });
 
 app.post("/students/add", (req, res) => {
     const { sid, name, age } = req.body;
-
     const errors = [];
     if (!sid || sid.trim() === "") {
         errors.push("Student ID is required");
@@ -85,36 +100,29 @@ app.post("/students/add", (req, res) => {
     if (!age || age < 18) {
         errors.push("Student Age should be at least 18");
     }
-
     const existingStudent = students.find(student => student.sid === sid);
     if (existingStudent) {
         errors.push("Student ID already exists");
     }
-
     if (errors.length > 0) {
         return res.render("addStudent", { title: "Add Student", errors, student: { sid, name, age } });
     }
-
     students.push({ sid, name, age: parseInt(age, 10) });
-    console.log("Student added:", { sid, name, age });
     res.redirect("/students");
 });
 
 app.get("/students/edit/:sid", (req, res) => {
     const studentId = req.params.sid;
     const student = students.find(student => student.sid === studentId);
-
     if (!student) {
         return res.status(404).send('Student not found');
     }
-
     res.render("editStudent", { title: "Update Student", student, errors: [] });
 });
 
 app.post("/students/edit/:sid", (req, res) => {
     const studentId = req.params.sid;
     const { name, age } = req.body;
-
     const errors = [];
     if (!name || name.length < 2) {
         errors.push('Student Name should be at least 2 characters');
@@ -122,19 +130,15 @@ app.post("/students/edit/:sid", (req, res) => {
     if (!age || age < 18) {
         errors.push('Student Age should be at least 18');
     }
-
     const student = students.find(student => student.sid === studentId);
     if (!student) {
         return res.status(404).send('Student not found');
     }
-
     if (errors.length > 0) {
         return res.render("editStudent", { title: "Update Student", student: { ...student, name, age }, errors });
     }
-
     student.name = name;
     student.age = parseInt(age, 10);
-
     res.redirect("/students");
 });
 
@@ -144,11 +148,12 @@ app.get("/grades", (req, res) => {
         if (a.student > b.student) return 1;
         return a.grade - b.grade;
     });
-
     res.render("grades", { title: "Grades Page", grades: sortedGrades });
 });
+
 const lecturersRoutes = require('./routes/lecturers');
 app.use('/lecturers', lecturersRoutes);
+
 app.get("/home", (req, res) => {
     res.redirect("/");
 });
