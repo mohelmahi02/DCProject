@@ -158,6 +158,14 @@ app.get("/home", (req, res) => {
     res.redirect("/");
 });
 
+app.get('/error', (req, res) => {
+    const lecturerId = req.query.lecturerId;
+    const errorMessage = req.query.error;
+
+    res.render('error', { error: errorMessage });
+});
+;
+
 app.listen(3004, () => {
     console.log("Application listening on port 3004");
 });

@@ -22,6 +22,7 @@
                     <td><%= lecturer.name %></td>
                     <td><%= lecturer.did %></td>
                     <td>
+                        
                         <form action="/lecturers/delete/<%= lecturer._id %>" method="POST" style="display:inline;">
                             <button type="submit">Delete</button>
                         </form>
@@ -30,5 +31,10 @@
             <% }); %>
         </tbody>
     </table>
+
+   
+    <% if (error) { %>
+        <p style="color: black;"><%= error %></p>
+    <% } %>
 </body>
 </html>
